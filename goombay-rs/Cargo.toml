@@ -1,0 +1,7 @@
+[package]
+name = "goombay-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+spindalis = "0.4.6"
