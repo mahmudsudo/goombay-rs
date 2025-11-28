@@ -17,6 +17,7 @@ impl NeedlemanWunsch {
         let subject_len = alignments.subject.len() + 1;
         let score_matrix = &mut alignments.score_matrix[0];
         let pointer_matrix = &mut alignments.pointer_matrix[0];
+
         // initialise matrices
         pointer_matrix[0][0] = PointerValues::Left as i32;
         for i in 1..query_len {
@@ -28,6 +29,7 @@ impl NeedlemanWunsch {
             pointer_matrix[0][j] = PointerValues::Left as i32;
         }
 
+        // Build pointer and score matrix
         for i in 1..query_len {
             for j in 1..subject_len {
                 let identity = {
@@ -54,6 +56,7 @@ impl NeedlemanWunsch {
                 }
             }
         }
+        // Signifies that matrices are built and don't need to be re-built
         alignments.is_built = true;
     }
 

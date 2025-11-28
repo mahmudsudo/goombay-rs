@@ -16,9 +16,9 @@ impl<'a> Iterator for GlobalAlignment<'a> {
     type Item = (String, String);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let identity = PointerValues::Match as i32;
-        let up = PointerValues::Up as i32;
-        let left = PointerValues::Left as i32;
+        let identity = PointerValues::Match as i32; // 2
+        let up = PointerValues::Up as i32; // 3
+        let left = PointerValues::Left as i32; // 4
 
         let identity_array = [
             identity,

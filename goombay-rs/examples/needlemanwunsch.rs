@@ -32,7 +32,8 @@ fn main() {
         println!("{alignment}");
     }
 
-    // And/or calculate alignment scores for aligned sequences
+    // Calculate alignment scores for aligned sequences
+    // Note: Alignment scores can be calculated independently from alignment
     let sim = nw.similarity(&mut nw_alignment);
     let dist = nw.distance(&mut nw_alignment);
     let norm_sim = nw.normalized_similarity(&mut nw_alignment);

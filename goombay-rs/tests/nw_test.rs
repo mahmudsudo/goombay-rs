@@ -206,7 +206,6 @@ fn test_all_alignments() {
 
     let (query, subject) = ("ATGTGTA", "ATA");
     let mut nw_alignment = AlignmentData::new(query, subject);
-    nw.build(&mut nw_alignment);
     let all_aligned = nw.align(&mut nw_alignment, true);
 
     assert_eq!(all_aligned.len(), 3);
