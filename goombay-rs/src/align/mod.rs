@@ -1,9 +1,9 @@
 use spindalis::utils::Arr2D;
 
 pub mod base;
-pub mod needleman_wunsch;
+pub mod edit;
 
-pub use needleman_wunsch::NeedlemanWunsch;
+pub use edit::needleman_wunsch::NeedlemanWunsch;
 
 pub enum PointerValues {
     Match = 2,
