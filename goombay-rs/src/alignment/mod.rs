@@ -1,9 +1,11 @@
+use crate::align::global_base::GlobalAlignmentModel;
 use spindalis::utils::Arr2D;
+pub mod scoring;
 
 pub mod edit;
 pub mod global_base;
 
-pub use edit::needleman_wunsch::NeedlemanWunsch;
+pub use scoring::Scoring;
 
 pub enum PointerValues {
     Match = 2,
@@ -12,13 +14,10 @@ pub enum PointerValues {
     Transpose = 8,
 }
 
-#[derive(Clone)]
-pub struct Scoring {
-    pub identity: usize,
-    pub mismatch: usize,
-    pub gap: usize,
-    pub transpose: Option<usize>,
-    pub extended_gap: Option<usize>,
+pub trait AlignmentMatrices<S: Scoring + Clone> {
+    fn compute(query: &str, subject: &str) -> GlobalAlignmentModel;
+    fn set_scores(scores: &S) -> Self;
+    fn calculate_matrix(&self, query: &str, subject: &str) -> GlobalAlignmentModel;
 }
 
 #[derive(Clone)]

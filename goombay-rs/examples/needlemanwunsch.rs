@@ -1,10 +1,12 @@
-use goombay_rs::align::{NeedlemanWunsch, Scoring};
+use goombay_rs::align::{AlignmentMatrices, NeedlemanWunsch};
+use goombay_rs::scoring::GeneralScoring;
 
 fn main() {
     // Sequences to be aligned
     let query = "attain";
     let subject = "atin";
 
+    println!("Default Scoring and all alignments");
     // Use Default parameters
     let nw_default = NeedlemanWunsch::compute(query, subject);
     // Align the sequences based on the pointer matrix
@@ -23,16 +25,15 @@ fn main() {
     let norm_sim = nw_default.normalized_similarity();
     let norm_dist = nw_default.normalized_distance();
     println!(
-        "Similarity: {sim}\nDistance: {dist}\nNormalized Similarity: {norm_sim}\nNormalized Distance: {norm_dist}"
+        "Similarity: {sim}\nDistance: {dist}\nNormalized Similarity: {norm_sim}\nNormalized Distance: {norm_dist}\n"
     );
 
+    println!("Custom Scoring and single alignment");
     // Set custom scoring parameters for Needleman Wunsch
-    let scores = Scoring {
+    let scores = GeneralScoring {
         identity: 5,
         mismatch: 3,
         gap: 2,
-        transpose: None,    // This is an Optional parameter
-        extended_gap: None, // This is an Optional parameter
     };
     let nw_custom_scores = NeedlemanWunsch::set_scores(&scores);
     let nw_custom = nw_custom_scores.calculate_matrix(query, subject);

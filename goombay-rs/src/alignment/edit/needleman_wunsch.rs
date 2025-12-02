@@ -1,38 +1,37 @@
 use crate::align::global_base::{GlobalAlgorithm, GlobalAlignmentModel, Metric};
-use crate::align::{AlignmentData, PointerValues, Scoring};
+use crate::align::scoring::GeneralScoring;
+use crate::align::{AlignmentData, AlignmentMatrices, PointerValues, Scoring};
 
-pub struct NeedlemanWunsch {
-    pub scores: Scoring,
+pub struct NeedlemanWunsch<S: Scoring + Clone> {
+    pub scores: S,
 }
 
-impl Default for NeedlemanWunsch {
+impl Default for NeedlemanWunsch<GeneralScoring> {
     fn default() -> Self {
-        let scores = Scoring {
+        let scores = GeneralScoring {
             identity: 2,
             mismatch: 1,
             gap: 2,
-            transpose: None,
-            extended_gap: None,
         };
         Self { scores }
     }
 }
 
-impl NeedlemanWunsch {
-    pub fn compute(query: &str, subject: &str) -> GlobalAlignmentModel {
+impl AlignmentMatrices<GeneralScoring> for NeedlemanWunsch<GeneralScoring> {
+    fn compute(query: &str, subject: &str) -> GlobalAlignmentModel {
         // Use default scores to calculate scoring and pointer matrices
         let nw_default = NeedlemanWunsch::default();
         nw_default.calculate_matrix(query, subject)
     }
 
-    pub fn set_scores(scores: &Scoring) -> Self {
+    fn set_scores(scores: &GeneralScoring) -> Self {
         // Set custom scores before manually calculating matrices
         Self {
             scores: scores.clone(),
         }
     }
 
-    pub fn calculate_matrix(&self, query: &str, subject: &str) -> GlobalAlignmentModel {
+    fn calculate_matrix(&self, query: &str, subject: &str) -> GlobalAlignmentModel {
         let mut alignments = AlignmentData::new(query, subject);
         let query_len = alignments.query.len() + 1;
         let subject_len = alignments.subject.len() + 1;

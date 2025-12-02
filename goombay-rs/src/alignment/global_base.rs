@@ -4,6 +4,7 @@ use spindalis::utils::Arr2D;
 #[derive(Clone)]
 pub enum GlobalAlgorithm {
     NeedlemanWunsch,
+    WagnerFischer,
 }
 
 // Handles matrices that store similarity score vs distance score
@@ -16,6 +17,7 @@ pub enum Metric {
 // Enum to select correct aligner based on algorithm producing GlobalAlignmentModel
 pub enum GlobalAlignerIteratorType<'a> {
     NeedlemanWunsch(GlobalAligner<'a>),
+    WagnerFischer(GlobalAligner<'a>),
 }
 
 // Return type for GlobalAlignerIteratorType
@@ -26,6 +28,7 @@ impl<'a> GlobalAlignerIteratorType<'a> {
     pub fn into_iterator(self) -> GlobalAlignmentIterator<'a> {
         match self {
             GlobalAlignerIteratorType::NeedlemanWunsch(aligner) => Box::new(aligner),
+            GlobalAlignerIteratorType::WagnerFischer(aligner) => Box::new(aligner),
         }
     }
 }
@@ -54,7 +57,7 @@ impl GlobalAlignmentModel {
 
     fn select_aligner(&self) -> Box<dyn Iterator<Item = (String, String)> + '_> {
         let selected_aligner = match self.aligner {
-            GlobalAlgorithm::NeedlemanWunsch => {
+            GlobalAlgorithm::NeedlemanWunsch | GlobalAlgorithm::WagnerFischer => {
                 let i = self.data.query.len();
                 let j = self.data.subject.len();
                 let global_aligner = GlobalAligner {

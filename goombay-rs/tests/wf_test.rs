@@ -1,19 +1,19 @@
-use goombay_rs::align::{AlignmentMatrices, NeedlemanWunsch};
-use goombay_rs::scoring::GeneralScoring;
+use goombay_rs::align::{AlignmentMatrices, WagnerFischer};
+use goombay_rs::scoring::LevenshteinScoring;
 use spindalis::utils::Arr2D;
 
 #[test]
 fn test_identical_sequences() {
-    let nw = NeedlemanWunsch::compute("ACTG", "ACTG");
+    let wf = WagnerFischer::compute("ACTG", "ACTG");
 
-    let aligned = nw.align();
-    let sim = nw.similarity();
-    let dist = nw.distance();
-    let norm_sim = nw.normalized_similarity();
-    let norm_dist = nw.normalized_distance();
+    let aligned = wf.align();
+    let sim = wf.similarity();
+    let dist = wf.distance();
+    let norm_sim = wf.normalized_similarity();
+    let norm_dist = wf.normalized_distance();
 
     assert_eq!(aligned[0], "ACTG\nACTG");
-    assert_eq!(sim, (4 * nw.identity) as i32); // alignment length = 4, identity score = 2
+    assert_eq!(sim, 4_i32);
     assert_eq!(dist, 0);
     assert_eq!(norm_sim, 1.0);
     assert_eq!(norm_dist, 0.0);
@@ -21,16 +21,16 @@ fn test_identical_sequences() {
 
 #[test]
 fn test_completely_different() {
-    let nw = NeedlemanWunsch::compute("AAAA", "TTTT");
-    let aligned = nw.align();
-    let sim = nw.similarity();
-    let dist = nw.distance();
-    let norm_sim = nw.normalized_similarity();
-    let norm_dist = nw.normalized_distance();
+    let wf = WagnerFischer::compute("AAAA", "TTTT");
+    let aligned = wf.align();
+    let sim = wf.similarity();
+    let dist = wf.distance();
+    let norm_sim = wf.normalized_similarity();
+    let norm_dist = wf.normalized_distance();
 
     assert_eq!(aligned[0], "AAAA\nTTTT");
-    assert_eq!(sim, -4_i32 * nw.mismatch as i32); // mismatch score = 1
-    assert_eq!(dist, (4 * nw.mismatch) as i32);
+    assert_eq!(sim, 0);
+    assert_eq!(dist, (4 * wf.mismatch) as i32);
     assert_eq!(norm_sim, 0.0);
     assert_eq!(norm_dist, 1.0);
 }
@@ -43,9 +43,9 @@ fn test_different_length() {
         ("ACGT", "AGT", "ACGT\nA-GT"), // Internal gap
     ];
     for (query, subject, expected) in test_cases {
-        let nw = NeedlemanWunsch::compute(query, subject);
+        let wf = WagnerFischer::compute(query, subject);
 
-        let aligned = nw.align();
+        let aligned = wf.align();
         assert_eq!(aligned[0], expected);
     }
 }
@@ -67,9 +67,9 @@ fn test_normalisation() {
         (1.0, 0.0),
     ];
     for ((query, subject), (expected_sim, expected_dist)) in sequences.iter().zip(expected) {
-        let nw = NeedlemanWunsch::compute(query, subject);
-        let norm_sim = nw.normalized_similarity();
-        let norm_dist = nw.normalized_distance();
+        let wf = WagnerFischer::compute(query, subject);
+        let norm_sim = wf.normalized_similarity();
+        let norm_dist = wf.normalized_distance();
 
         assert_eq!(norm_sim, expected_sim);
         assert_eq!(norm_dist, expected_dist);
@@ -78,27 +78,26 @@ fn test_normalisation() {
 
 #[test]
 fn test_empty_sequences() {
-    let custom_scores = GeneralScoring {
-        identity: 2,
-        mismatch: 1,
-        gap: 1,
+    let custom_scores = LevenshteinScoring {
+        substitution: 1,
+        gap: 5,
     };
-    let custom_nw = NeedlemanWunsch::set_scores(&custom_scores);
+    let custom_wf = WagnerFischer::set_scores(&custom_scores);
 
     let gap_score = custom_scores.gap as i32;
 
     let test_cases = vec![
-        ("", "ACTG", "----\nACTG", -4 * gap_score, 4 * gap_score),
-        ("ACTG", "", "ACTG\n----", -4 * gap_score, 4 * gap_score),
+        ("", "ACTG", "----\nACTG", 0, 4 * gap_score),
+        ("ACTG", "", "ACTG\n----", 0, 4 * gap_score),
         ("", "", "\n", 1, 0),
     ];
 
     for (query, subject, expected_align, expected_sim, expected_dist) in test_cases {
-        let nw = custom_nw.calculate_matrix(query, subject);
+        let wf = custom_wf.calculate_matrix(query, subject);
 
-        let aligned = nw.align();
-        let sim = nw.similarity();
-        let dist = nw.distance();
+        let aligned = wf.align();
+        let sim = wf.similarity();
+        let dist = wf.distance();
 
         assert_eq!(aligned[0], expected_align);
         assert_eq!(sim, expected_sim);
@@ -108,14 +107,14 @@ fn test_empty_sequences() {
 
 #[test]
 fn test_single_character() {
-    let nw_match = NeedlemanWunsch::compute("A", "A");
+    let nw_match = WagnerFischer::compute("A", "A");
     assert_eq!(nw_match.align()[0], "A\nA");
-    assert_eq!(nw_match.similarity(), nw_match.identity as i32);
+    assert_eq!(nw_match.similarity(), 1);
     assert_eq!(nw_match.distance(), 0);
 
-    let nw_mismatch = NeedlemanWunsch::compute("A", "T");
+    let nw_mismatch = WagnerFischer::compute("A", "T");
     assert_eq!(nw_mismatch.align()[0], "A\nT");
-    assert_eq!(nw_mismatch.similarity(), -(nw_mismatch.mismatch as i32));
+    assert_eq!(nw_mismatch.similarity(), 0);
     assert_eq!(nw_mismatch.distance(), nw_mismatch.mismatch as i32);
 }
 
@@ -124,11 +123,11 @@ fn test_case_sensitivity() {
     let test_cases = vec![("ACTG", "actg"), ("AcTg", "aCtG"), ("actg", "ACTG")];
 
     for (query, subject) in test_cases {
-        let nw_mixed = NeedlemanWunsch::compute(query, subject);
+        let nw_mixed = WagnerFischer::compute(query, subject);
 
         let aligned_mixed = nw_mixed.align();
 
-        let nw_upper = NeedlemanWunsch::compute(
+        let nw_upper = WagnerFischer::compute(
             query.to_uppercase().as_str(),
             subject.to_uppercase().as_str(),
         );
@@ -144,23 +143,22 @@ fn test_case_sensitivity() {
 
 #[test]
 fn test_scoring_parameters() {
-    let custom_scores = GeneralScoring {
-        identity: 1,
-        mismatch: 2,
+    let custom_scores = LevenshteinScoring {
+        substitution: 2,
         gap: 3,
     };
-    let custom_nw = NeedlemanWunsch::set_scores(&custom_scores);
+    let custom_wf = WagnerFischer::set_scores(&custom_scores);
 
-    let nw_alignment = custom_nw.calculate_matrix("ACGT", "AGT");
-    assert_eq!(nw_alignment.align()[0], "ACGT\nA-GT");
+    let wf_alignment = custom_wf.calculate_matrix("ACGT", "AGT");
+    assert_eq!(wf_alignment.align()[0], "ACGT\nA-GT");
 
     let query = "AC";
     let subject = "AT";
-    let nw_alignment_matrix = custom_nw.calculate_matrix(query, subject);
+    let wf_alignment_matrix = custom_wf.calculate_matrix(query, subject);
 
-    let expected_score: Arr2D<i32> = Arr2D::from(&[[0, -3, -6], [-3, 1, -2], [-6, -2, -1]]);
+    let expected_score: Arr2D<i32> = Arr2D::from(&[[0, 3, 6], [3, 0, 3], [6, 3, 2]]);
 
-    let score_matrix = &nw_alignment_matrix.data.score_matrix();
+    let score_matrix = &wf_alignment_matrix.data.score_matrix();
     for r in 0..=query.len() {
         for c in 0..=subject.len() {
             assert_eq!(
@@ -174,16 +172,16 @@ fn test_scoring_parameters() {
 #[test]
 fn test_all_alignments() {
     let (query, subject) = ("ACCG", "ACG");
-    let nw = NeedlemanWunsch::compute(query, subject);
-    let all_aligned = nw.all_alignments(true).align();
+    let wf = WagnerFischer::compute(query, subject);
+    let all_aligned = wf.all_alignments(true).align();
 
     assert_eq!(all_aligned.len(), 2);
     assert!(all_aligned.contains(&"ACCG\nAC-G".to_string()));
     assert!(all_aligned.contains(&"ACCG\nA-CG".to_string()));
 
     let (query, subject) = ("ATGTGTA", "ATA");
-    let nw = NeedlemanWunsch::compute(query, subject);
-    let all_aligned = nw.all_alignments(true).align();
+    let wf = WagnerFischer::compute(query, subject);
+    let all_aligned = wf.all_alignments(true).align();
 
     assert_eq!(all_aligned.len(), 3);
     assert!(all_aligned.contains(&"ATGTGTA\nAT----A".to_string()));

@@ -1,2 +1,19 @@
-pub mod align;
+pub mod alignment;
 pub mod phylo;
+
+pub mod scoring {
+    pub use crate::alignment::scoring;
+
+    pub use scoring::ExtendedGapScoring;
+    pub use scoring::GeneralScoring;
+    pub use scoring::LevenshteinScoring;
+    pub use scoring::TransposeScoring;
+}
+
+pub mod align {
+    // Re-exports everything from alignment folder as align
+    pub use crate::alignment::*;
+
+    pub use edit::needleman_wunsch::NeedlemanWunsch;
+    pub use edit::wagner_fischer::WagnerFischer;
+}
