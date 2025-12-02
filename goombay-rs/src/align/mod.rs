@@ -1,7 +1,7 @@
 use spindalis::utils::Arr2D;
 
-pub mod base;
 pub mod edit;
+pub mod global_base;
 
 pub use edit::needleman_wunsch::NeedlemanWunsch;
 
