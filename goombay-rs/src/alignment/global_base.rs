@@ -40,6 +40,7 @@ pub struct GlobalAlignmentModel {
     pub metric: Metric,
     pub identity: usize,
     pub mismatch: usize,
+    pub gap: usize,
     pub all_alignments: bool,
 }
 
@@ -51,6 +52,7 @@ impl GlobalAlignmentModel {
             metric: self.metric.clone(),
             identity: self.identity,
             mismatch: self.mismatch,
+            gap: self.gap,
             all_alignments: value,
         }
     }
@@ -146,12 +148,20 @@ impl GlobalAlignmentModel {
                     .max()
                     .copied()
                     .unwrap();
+                let min_length = [self.data.query.len(), self.data.subject.len()]
+                    .iter()
+                    .min()
+                    .copied()
+                    .unwrap();
                 let max_possible = (max_length * self.identity) as f64;
-                let min_possible = (max_length * self.mismatch) as f64;
+                let min_possible =
+                    -((min_length * self.mismatch + (max_length - min_length) * self.gap) as f64);
 
-                let score_range = max_possible + min_possible.abs();
-
-                (raw_sim + min_possible.abs()) / score_range
+                let score_range = max_possible - min_possible;
+                if score_range.abs() < f64::EPSILON {
+                    return 1.0;
+                }
+                (raw_sim - min_possible) / score_range
             }
             Metric::Distance => 1_f64 - self.normalized_distance(),
         }

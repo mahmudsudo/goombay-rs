@@ -80,6 +80,7 @@ impl AlignmentMatrices<LevenshteinScoring> for WagnerFischer<LevenshteinScoring>
             metric: Metric::Distance,
             identity: 0,
             mismatch: self.scores.substitution,
+            gap: self.scores.gap,
             all_alignments: false,
         }
     }

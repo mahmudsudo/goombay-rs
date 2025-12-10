@@ -83,6 +83,7 @@ impl AlignmentMatrices<GeneralScoring> for NeedlemanWunsch<GeneralScoring> {
             metric: Metric::Similarity,
             identity: self.scores.identity,
             mismatch: self.scores.mismatch,
+            gap: self.scores.gap,
             all_alignments: false,
         }
     }
