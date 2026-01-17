@@ -4,6 +4,7 @@ pub mod scoring;
 
 pub mod edit;
 pub mod global_base;
+pub mod local_base;
 
 pub use scoring::Scoring;
 
@@ -18,6 +19,16 @@ pub trait AlignmentMatrices<S: Scoring + Clone> {
     fn compute(query: &str, subject: &str) -> GlobalAlignmentModel;
     fn set_scores(scores: &S) -> Self;
     fn calculate_matrix(&self, query: &str, subject: &str) -> GlobalAlignmentModel;
+}
+
+pub trait LocalAlignmentMatrices<S: Scoring + Clone> {
+    fn compute(query: &str, subject: &str) -> crate::align::local_base::LocalAlignmentModel;
+    fn set_scores(scores: &S) -> Self;
+    fn calculate_matrix(
+        &self,
+        query: &str,
+        subject: &str,
+    ) -> crate::align::local_base::LocalAlignmentModel;
 }
 
 #[derive(Clone)]

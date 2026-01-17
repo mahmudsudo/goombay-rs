@@ -13,7 +13,9 @@ pub mod scoring {
 pub mod align {
     // Re-exports everything from alignment folder as align
     pub use crate::alignment::*;
+    pub use crate::alignment::LocalAlignmentMatrices;
 
     pub use edit::needleman_wunsch::NeedlemanWunsch;
     pub use edit::wagner_fischer::WagnerFischer;
+    pub use edit::smith_waterman::SmithWaterman;
 }
