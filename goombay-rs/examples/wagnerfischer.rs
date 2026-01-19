@@ -1,4 +1,4 @@
-use goombay_rs::align::{AlignmentMatrices, WagnerFischer};
+use goombay_rs::align::{GlobalAlignmentMatrix, WagnerFischer};
 use goombay_rs::scoring::LevenshteinScoring;
 
 fn main() {

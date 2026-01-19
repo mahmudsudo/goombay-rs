@@ -1,6 +1,6 @@
 use crate::align::local_base::{LocalAlgorithm, LocalAlignmentModel, LocalMetric};
 use crate::align::scoring::GeneralScoring;
-use crate::align::{AlignmentData, LocalAlignmentMatrices, PointerValues, Scoring};
+use crate::align::{AlignmentData, LocalAlignmentMatrix, PointerValues, Scoring};
 
 pub struct SmithWaterman<S: Scoring + Clone> {
     pub scores: S,
@@ -17,7 +17,7 @@ impl Default for SmithWaterman<GeneralScoring> {
     }
 }
 
-impl LocalAlignmentMatrices<GeneralScoring> for SmithWaterman<GeneralScoring> {
+impl LocalAlignmentMatrix<GeneralScoring> for SmithWaterman<GeneralScoring> {
     fn compute(query: &str, subject: &str) -> LocalAlignmentModel {
         let sw_default = SmithWaterman::default();
         sw_default.calculate_matrix(query, subject)

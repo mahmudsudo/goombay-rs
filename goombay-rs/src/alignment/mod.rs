@@ -1,4 +1,5 @@
 use crate::align::global_base::GlobalAlignmentModel;
+use crate::align::local_base::LocalAlignmentModel;
 use spindalis::utils::Arr2D;
 pub mod scoring;
 
@@ -15,20 +16,16 @@ pub enum PointerValues {
     Transpose = 8,
 }
 
-pub trait AlignmentMatrices<S: Scoring + Clone> {
+pub trait GlobalAlignmentMatrix<S: Scoring + Clone> {
     fn compute(query: &str, subject: &str) -> GlobalAlignmentModel;
     fn set_scores(scores: &S) -> Self;
     fn calculate_matrix(&self, query: &str, subject: &str) -> GlobalAlignmentModel;
 }
 
-pub trait LocalAlignmentMatrices<S: Scoring + Clone> {
-    fn compute(query: &str, subject: &str) -> crate::align::local_base::LocalAlignmentModel;
+pub trait LocalAlignmentMatrix<S: Scoring + Clone> {
+    fn compute(query: &str, subject: &str) -> LocalAlignmentModel;
     fn set_scores(scores: &S) -> Self;
-    fn calculate_matrix(
-        &self,
-        query: &str,
-        subject: &str,
-    ) -> crate::align::local_base::LocalAlignmentModel;
+    fn calculate_matrix(&self, query: &str, subject: &str) -> LocalAlignmentModel;
 }
 
 #[derive(Clone)]

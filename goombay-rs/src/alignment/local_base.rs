@@ -13,22 +13,6 @@ pub enum LocalMetric {
     Similarity,
 }
 
-// Enum to select correct aligner based on algorithm producing LocalAlignmentModel
-pub enum LocalAlignerIteratorType<'a> {
-    SmithWaterman(LocalAligner<'a>),
-}
-
-// Return type for LocalAlignerIteratorType
-pub type LocalAlignmentIterator<'a> = Box<dyn Iterator<Item = (String, String)> + 'a>;
-
-impl<'a> LocalAlignerIteratorType<'a> {
-    pub fn into_iterator(self) -> LocalAlignmentIterator<'a> {
-        match self {
-            LocalAlignerIteratorType::SmithWaterman(aligner) => Box::new(aligner),
-        }
-    }
-}
-
 pub struct LocalAlignmentModel {
     pub data: AlignmentData,
     pub aligner: LocalAlgorithm,
@@ -57,20 +41,24 @@ impl LocalAlignmentModel {
     }
 
     fn select_aligner(&self) -> Box<dyn Iterator<Item = (String, String)> + '_> {
-        let selected_aligner = match self.aligner {
+        match self.aligner {
             LocalAlgorithm::SmithWaterman => {
                 let local_aligner = LocalAligner {
                     query_chars: &self.data.query,
                     subject_chars: &self.data.subject,
                     pointer_matrix: self.data.pointer_matrix(),
                     score_matrix: self.data.score_matrix(),
-                    stack: self.start_indices.iter().map(|&(i, j)| (Vec::new(), Vec::new(), i, j)).collect(),
+                    stack: self
+                        .start_indices
+                        .iter()
+                        .map(|&(i, j)| (Vec::new(), Vec::new(), i, j))
+                        .collect(),
                     all_alignments: self.all_alignments,
                 };
-                LocalAlignerIteratorType::SmithWaterman(local_aligner)
+                // Turns struct into dynamically dispatched iterator
+                Box::new(local_aligner)
             }
-        };
-        selected_aligner.into_iterator()
+        }
     }
 
     pub fn align(&self) -> Vec<String> {

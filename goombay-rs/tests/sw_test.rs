@@ -1,4 +1,4 @@
-use goombay_rs::align::{LocalAlignmentMatrices, SmithWaterman};
+use goombay_rs::align::{LocalAlignmentMatrix, SmithWaterman};
 use goombay_rs::scoring::GeneralScoring;
 
 #[test]
@@ -8,7 +8,7 @@ fn test_identical_sequences() {
     let sim = sw.similarity();
 
     assert_eq!(aligned[0], "ACTG\nACTG");
-    assert_eq!(sim, (4 * sw.identity) as i32); 
+    assert_eq!(sim, (4 * sw.identity) as i32);
 }
 
 #[test]
@@ -63,7 +63,7 @@ fn test_all_alignments_sw() {
     // Two equal local matches
     let sw = SmithWaterman::compute("ACTGNNNACTG", "ACTG");
     let all_aligned = sw.all_alignments(true).align();
-    
+
     // It should find both "ACTG" matches if they have the same max score
     assert_eq!(all_aligned.len(), 2);
     for alignment in all_aligned {
