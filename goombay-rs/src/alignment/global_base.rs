@@ -14,25 +14,6 @@ pub enum Metric {
     Distance,
 }
 
-// Enum to select correct aligner based on algorithm producing GlobalAlignmentModel
-pub enum GlobalAlignerIteratorType<'a> {
-    NeedlemanWunsch(GlobalAligner<'a>),
-    WagnerFischer(GlobalAligner<'a>),
-}
-
-// Return type for GlobalAlignerIteratorType
-pub type GlobalAlignmentIterator<'a> = Box<dyn Iterator<Item = (String, String)> + 'a>;
-
-// Turns enum into dynamically dispatched iterator
-impl<'a> GlobalAlignerIteratorType<'a> {
-    pub fn into_iterator(self) -> GlobalAlignmentIterator<'a> {
-        match self {
-            GlobalAlignerIteratorType::NeedlemanWunsch(aligner) => Box::new(aligner),
-            GlobalAlignerIteratorType::WagnerFischer(aligner) => Box::new(aligner),
-        }
-    }
-}
-
 // This struct holds the user-facing alignment and scoring functions
 pub struct GlobalAlignmentModel {
     pub data: AlignmentData,
@@ -58,7 +39,7 @@ impl GlobalAlignmentModel {
     }
 
     fn select_aligner(&self) -> Box<dyn Iterator<Item = (String, String)> + '_> {
-        let selected_aligner = match self.aligner {
+        match self.aligner {
             GlobalAlgorithm::NeedlemanWunsch | GlobalAlgorithm::WagnerFischer => {
                 let i = self.data.query.len();
                 let j = self.data.subject.len();
@@ -72,10 +53,10 @@ impl GlobalAlignmentModel {
                     up_val: PointerValues::Up as i32,
                     left_val: PointerValues::Left as i32,
                 };
-                GlobalAlignerIteratorType::NeedlemanWunsch(global_aligner)
+                // Turns struct into dynamically dispatched iterator
+                Box::new(global_aligner)
             }
-        };
-        selected_aligner.into_iterator()
+        }
     }
 
     pub fn align(&self) -> Vec<String> {

@@ -15,5 +15,6 @@ pub mod align {
     pub use crate::alignment::*;
 
     pub use edit::needleman_wunsch::NeedlemanWunsch;
+    pub use edit::smith_waterman::SmithWaterman;
     pub use edit::wagner_fischer::WagnerFischer;
 }

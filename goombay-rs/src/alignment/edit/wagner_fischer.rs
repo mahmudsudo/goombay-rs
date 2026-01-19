@@ -1,6 +1,6 @@
 use crate::align::global_base::{GlobalAlgorithm, GlobalAlignmentModel, Metric};
 use crate::align::scoring::LevenshteinScoring;
-use crate::align::{AlignmentData, AlignmentMatrices, PointerValues, Scoring};
+use crate::align::{AlignmentData, GlobalAlignmentMatrix, PointerValues, Scoring};
 
 pub struct WagnerFischer<S: Scoring + Clone> {
     pub scores: S,
@@ -16,7 +16,7 @@ impl Default for WagnerFischer<LevenshteinScoring> {
     }
 }
 
-impl AlignmentMatrices<LevenshteinScoring> for WagnerFischer<LevenshteinScoring> {
+impl GlobalAlignmentMatrix<LevenshteinScoring> for WagnerFischer<LevenshteinScoring> {
     fn compute(query: &str, subject: &str) -> GlobalAlignmentModel {
         // Use default scores to calculate scoring and pointer matrices
         let wf_default = WagnerFischer::default();

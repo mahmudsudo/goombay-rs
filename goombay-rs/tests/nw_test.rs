@@ -1,4 +1,4 @@
-use goombay_rs::align::{AlignmentMatrices, NeedlemanWunsch};
+use goombay_rs::align::{GlobalAlignmentMatrix, NeedlemanWunsch};
 use goombay_rs::scoring::GeneralScoring;
 use spindalis::utils::Arr2D;
 

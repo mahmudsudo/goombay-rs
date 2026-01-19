@@ -1,6 +1,6 @@
 use crate::align::global_base::{GlobalAlgorithm, GlobalAlignmentModel, Metric};
 use crate::align::scoring::GeneralScoring;
-use crate::align::{AlignmentData, AlignmentMatrices, PointerValues, Scoring};
+use crate::align::{AlignmentData, GlobalAlignmentMatrix, PointerValues, Scoring};
 
 pub struct NeedlemanWunsch<S: Scoring + Clone> {
     pub scores: S,
@@ -17,7 +17,7 @@ impl Default for NeedlemanWunsch<GeneralScoring> {
     }
 }
 
-impl AlignmentMatrices<GeneralScoring> for NeedlemanWunsch<GeneralScoring> {
+impl GlobalAlignmentMatrix<GeneralScoring> for NeedlemanWunsch<GeneralScoring> {
     fn compute(query: &str, subject: &str) -> GlobalAlignmentModel {
         // Use default scores to calculate scoring and pointer matrices
         let nw_default = NeedlemanWunsch::default();
