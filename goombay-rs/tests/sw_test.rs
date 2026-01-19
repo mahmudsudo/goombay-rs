@@ -37,25 +37,12 @@ fn test_no_similarity() {
 
 #[test]
 fn test_different_length_local() {
-    let sw = SmithWaterman::compute("GCATGCG", "GATTACA");
+    let sw = SmithWaterman::compute("TGTTACGG", "GGTTGACTA");
     let aligned = sw.align();
-    // G C A T G C G
-    // G A T T A C A
-    // G vs G = 2
-    // A vs A = 2
-    // T vs T = 2
-    // T vs T = 2
-    // G-A Match? 
-    // Let's see what a standard SW would give
-    // G C A T G C G
-    // G A T T A C A
-    // G..C..A..T..G..C..G
-    // G..A..T..T..A..C..A
-    // G   -   A   T
-    // G   A   -   T  ?
-    
+
     assert!(sw.similarity() > 0);
     assert!(!aligned[0].is_empty());
+    assert_eq!(aligned[0], "GTT-AC\nGTTGAC");
 }
 
 #[test]
